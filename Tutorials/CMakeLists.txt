@@ -59,4 +59,8 @@ add_subdirectory(Tutorial29_OIT)
 if(PLATFORM_VISIONOS)
     add_subdirectory(Tutorial30_HelloVisionOS)
 endif()
+if(D3D12_SUPPORTED OR VULKAN_SUPPORTED OR D3D11_SUPPORTED OR GL_SUPPORTED OR METAL_SUPPORTED)
+    add_subdirectory(Tutorial31_LinkedMultiGPU)
+    add_subdirectory(Tutorial32_UnlinkedMultiGPU)
+endif()
 
