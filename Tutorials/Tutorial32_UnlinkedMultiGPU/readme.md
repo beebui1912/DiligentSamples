@@ -40,5 +40,18 @@ On a machine with a single GPU, the secondary device is created on the *same* ph
 fully valid and still exercises the complete cross-device transfer path, so the sample is useful for
 development even without a second GPU.
 
-> **Note:** Creating a second device is currently wired up for the Direct3D12 and Vulkan backends.
-> See `Tutorial31_LinkedMultiGPU` for multi-GPU using a single linked device with multiple nodes.
+## Vulkan note
+
+Diligent's Vulkan backend uses [volk](https://github.com/zeux/volk). `volkLoadInstance()` loads
+every device-level entry point as a loader trampoline that dispatches correctly for **any** device,
+while `volkLoadDevice()` rebinds the single set of *global* pointers to one specific device for a
+small speedup. To let more than one Vulkan device coexist and stay fast, each
+`VulkanUtilities::LogicalDevice` now owns a dedicated `VolkDeviceTable` (via `volkLoadDeviceTable()`),
+and the per-frame hot path - command-buffer recording (`VulkanUtilities::CommandBuffer`) - dispatches
+through the owning device's table (`LogicalDevice::GetVkTable()`). This is the same technique
+The-Forge uses, so every device records commands through its own optimized, non-trampolined function
+pointers. Cold-path calls that are not routed through a table fall back to the global pointers, which
+remain valid for any device. Single-device applications keep their fully optimized path.
+
+> **Note:** Creating a second device is wired up for the Direct3D12 and Vulkan backends. See
+> `Tutorial31_LinkedMultiGPU` for multi-GPU using a single linked device with multiple nodes.
